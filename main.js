@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const canvas = document.getElementById('c');
@@ -16,9 +17,15 @@ scene.background = new THREE.Color(0x2b1b17);
 const camera = new THREE.PerspectiveCamera(20, 2, 0.1, 100); // fov, aspect, near, far
 camera.position.set(0, 0, 1);
 
+// configure DRACO loader to decode compressed model file
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderConfig({ type: 'js' });
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
 // add model
 const loader = new GLTFLoader();
-loader.load('model.glb', (gltf) => {
+loader.setDRACOLoader(dracoLoader);
+loader.load('model_drc.glb', (gltf) => {
   gltf.scene.position.set(0, 0, 0);
   gltf.scene.scale.set(1, 1, 1);
   autoframeCamera(gltf.scene);

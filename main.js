@@ -2,17 +2,18 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import SetupGUI from './gui.js';
 
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
   canvas,
-  // alpha: true,
-  // premultipliedAlpha: false,
+  alpha: true,
+  premultipliedAlpha: false,
 });
 renderer.toneMapping = THREE.ReinhardToneMapping;
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x2b1b17);
+// scene.background = new THREE.Color(0x2b1b17);
 
 const camera = new THREE.PerspectiveCamera(20, 2, 0.1, 100); // fov, aspect, near, far
 camera.position.set(0, 0, 1);
@@ -29,6 +30,8 @@ loader.load('model_drc.glb', (gltf) => {
   gltf.scene.position.set(0, 0, 0);
   gltf.scene.scale.set(1, 1, 1);
   autoframeCamera(gltf.scene);
+
+  gsap.to('#loading', { opacity: 0, display: 'none', duration: 0.5 });
   scene.add(gltf.scene);
 });
 
@@ -99,7 +102,6 @@ function render() {
   }
 
   controls.update();
-  console.log('position:', camera.position.z - cameraDistance);
   b.disabled =
     controls.target.equals(new THREE.Vector3(0, 0, 0)) && camera.position.z == cameraDistance;
 
@@ -153,3 +155,5 @@ function createLine() {
   const line = new THREE.Line(geometry, material);
   return line;
 }
+
+// SetupGUI(camera);

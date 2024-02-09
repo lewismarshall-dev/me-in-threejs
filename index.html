@@ -16,6 +16,44 @@
       body {
         margin: 0;
         height: 100svh;
+        --bg: #2b1b17;
+        background: var(--bg);
+      }
+      #loading {
+        z-index: 2;
+        width: 100vw;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: var(--bg);
+        --c1: #a9a9a9;
+        color: var(--c1);
+        font: 600 1.25rem 'Courier New', monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+      .loader {
+        width: 50px;
+        aspect-ratio: 4;
+        --_g: no-repeat radial-gradient(circle closest-side, var(--c1) 90%, #0000);
+        background: var(--_g) 0% 50%, var(--_g) 50% 50%, var(--_g) 100% 50%;
+        background-size: calc(100% / 3) 100%;
+        animation: loader 1s infinite linear;
+        margin-bottom: 20px;
+      }
+      @keyframes loader {
+        33% {
+          background-size: calc(100% / 3) 0%, calc(100% / 3) 100%, calc(100% / 3) 100%;
+        }
+        50% {
+          background-size: calc(100% / 3) 100%, calc(100% / 3) 0%, calc(100% / 3) 100%;
+        }
+        66% {
+          background-size: calc(100% / 3) 100%, calc(100% / 3) 100%, calc(100% / 3) 0%;
+        }
       }
       #c {
         position: fixed;
@@ -37,8 +75,8 @@
         position: absolute;
         bottom: 0;
         right: 0;
-        z-index: 2;
-        margin: 3rem;
+        z-index: 1;
+        margin: 5svh;
         padding: 0.5rem;
         text-decoration: none;
         transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
@@ -65,6 +103,10 @@
     </style>
   </head>
   <body>
+    <div id="loading">
+      <div class="loader"></div>
+      Loading
+    </div>
     <button id="b" disabled="true"><i class="fa-solid fa-crosshairs"></i></button>
     <canvas id="c"></canvas>
 
@@ -73,7 +115,8 @@
       {
         "imports": {
           "three": "https://unpkg.com/three@v0.149.0/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@v0.149.0/examples/jsm/"
+          "three/addons/": "https://unpkg.com/three@v0.149.0/examples/jsm/",
+          "GUI": "https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm"
         }
       }
     </script>

@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import CameraControls from 'camera-controls';
+CameraControls.install({ THREE: THREE });
 
 let instance;
 
-export class Scene {
-  controls = false;
+class Scene {
+  controls = true;
   lights = {};
 
   constructor() {
@@ -48,6 +49,8 @@ export class Scene {
     loader.load('model_drc.glb', (gltf) => {
       gltf.scene.position.set(0, 0, 0);
       gltf.scene.scale.set(1, 1, 1);
+
+      // this.#centerModel(gltf.scene);
       this.#autoframeCamera(gltf.scene);
 
       // Execute the callback function once the model is loaded
@@ -72,11 +75,12 @@ export class Scene {
 
   configButtonOverlay(b) {
     this.buttonOverlay = b;
-    this.#configControls();
+    if (!this.controls) this.#configControls();
   }
 
   #configControls() {
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new CameraControls(this.camera, this.canvas);
+    this.clock = new THREE.Clock();
 
     this.controls.minPolarAngle = Math.PI / 5;
     this.controls.maxPolarAngle = Math.PI / 2;
@@ -105,6 +109,7 @@ export class Scene {
     // move camera back along the Z-axis
     this.cameraDistance = opp / Math.tan(theta);
     this.camera.position.z = this.cameraDistance;
+    this.controls.dollyTo(this.cameraDistance);
 
     // Set camera target to the center of the bounding box
     this.camera.lookAt(boxCenter);
@@ -125,15 +130,15 @@ export class Scene {
       this.camera.updateProjectionMatrix();
     }
 
-    if (this.controls) this.controls.update();
+    if (this.controls) this.controls.update(this.clock.getDelta());
 
     this.renderer.render(this.scene, this.camera);
 
     // re-align button toggles if camera is/isn't in default position
     if (this.buttonOverlay) {
       b.disabled =
-        this.controls.target.equals(new THREE.Vector3(0, 0, 0)) &&
-        this.camera.position.z == this.cameraDistance;
+        this.controls.getTarget().equals(new THREE.Vector3(0, 0, 0)) &&
+        this.controls.getPosition().z == this.cameraDistance;
     }
   }
 

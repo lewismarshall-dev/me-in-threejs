@@ -9,6 +9,7 @@ let instance;
 class Scene {
   controls = true;
   lights = {};
+  helpers = {};
 
   constructor() {
     // ensure only one instance is created
@@ -37,7 +38,7 @@ class Scene {
     instance = this;
   }
 
-  loadModel(callback) {
+  loadModel(compression, callback) {
     // configure DRACO loader to decode compressed model file
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderConfig({ type: 'js' });
@@ -45,8 +46,25 @@ class Scene {
 
     // add model
     const loader = new GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
-    loader.load('model_drc.glb', (gltf) => {
+
+    let path;
+    switch (compression) {
+      case 'none':
+        path = 'model.glb';
+        break;
+      case 'drc':
+        path = 'model_drc.glb';
+        loader.setDRACOLoader(dracoLoader);
+        break;
+      case 'opt':
+      default:
+        path = 'model_opt.glb';
+        loader.setDRACOLoader(dracoLoader);
+        break;
+    }
+
+    console.log('path =', path);
+    loader.load(path, (gltf) => {
       gltf.scene.position.set(0, 0, 0);
       gltf.scene.scale.set(1, 1, 1);
 
@@ -62,15 +80,28 @@ class Scene {
     });
   }
 
-  addLight(name, light, p) {
+  addLight(name, light, useHelper, p, t) {
     // set light's position
     if (p) light.position.set(p[0], p[1], p[2]);
+    if (t) light.target.set(t[0], t[1], t[2]);
 
     this.lights = {
       ...this.lights,
       [name]: light,
     };
-    this.scene.add(this.lights[name]);
+
+    this.scene.add(light);
+
+    if (useHelper) {
+      const lightType = light.type;
+      const lightHelper = new THREE[`${lightType}Helper`](light);
+      lightHelper.color = 0xffffff;
+      this.helpers = {
+        ...this.helpers,
+        [name]: lightHelper,
+      };
+      this.scene.add(lightHelper);
+    }
   }
 
   configButtonOverlay(b) {
@@ -84,7 +115,7 @@ class Scene {
 
     this.controls.minPolarAngle = Math.PI / 5;
     this.controls.maxPolarAngle = Math.PI / 2;
-    this.controls.minDistance = 200;
+    this.controls.minDistance = 100;
     this.controls.maxDistance = 1200;
   }
 
